@@ -1,0 +1,12 @@
+# maven
+target
+
+# idea
+.idea
+*.iml
+
+# rootCA
+rootCA/*.key
+
+# build
+mirror
