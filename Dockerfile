@@ -4,4 +4,5 @@ COPY target/appassembler/ mirror-adapter/
 
 RUN chmod u+x mirror-adapter/bin/app
 
-ENTRYPOINT mirror-adapter/bin/app
+ENTRYPOINT ["./mirror-adapter/bin/app"]
+CMD []
