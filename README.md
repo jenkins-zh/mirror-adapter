@@ -1,22 +1,39 @@
-```shell script
-openssl genrsa -out rootCA/mirror-adapter.key 1024
-openssl req -new -x509 -days 1095 -key rootCA/mirror-adapter.key \
-    -out rootCA/mirror-adapter.crt \
-    -subj "/C=CN/ST=GD/L=SZ/O=vihoo/OU=dev/CN=demo.com/emailAddress=admin@jenkins-zh.com"
-```
+An adapter of Jenkins update center.
 
-```shell script
-mvn clean package appassembler:assemble
-chmod u+x ./target/appassembler/bin/app
-rm mirror/update-center.json
-./target/appassembler/bin/app -connection-check-url https://www.baidu.com/ \
-  -mirror-json mirror/update-center.json -mirror-url https://mirrors.tuna.tsinghua.edu.cn/jenkins/ \
-  -official-json update-center.json \
-  -key /Users/rick/Workspace/GitHub/jenkins-zh/mirror-adapter/rootCA/mirror-adapter.key \
-  -certificate /Users/rick/Workspace/GitHub/jenkins-zh/mirror-adapter/rootCA/mirror-adapter.crt \
-  -root-certificate /Users/rick/Workspace/GitHub/jenkins-zh/mirror-adapter/rootCA/mirror-adapter.crt
-rm /Users/rick/Downloads/apache-tomcat-7.0.96/webapps/test/update-center.json
-cp mirror/update-center.json /Users/rick/Downloads/apache-tomcat-7.0.96/webapps/test
-cp /Users/rick/Workspace/GitHub/jenkins-zh/mirror-adapter/rootCA/mirror-adapter.crt \
-  /Users/rick/.jenkins/war/WEB-INF/update-center-rootCAs
-```
+## Why
+
+Jenkins downloads the plugins by parsing the JSON file which comes from a update center.
+One thing that you might already noticed is about the speed of downloading.
+Accessing a global storage for everyone could be slow although 
+there're many [mirror sites](http://mirrors.jenkins-ci.org/status.html).
+
+If you deep into the file [update-center.json](https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/update-center.json).
+Almost every mirror file is base on `http://updates.jenkins-ci.org/download/plugins`.
+So, the result is that these mirror sites can only speed up the process of downloading file update-center.json.
+Jenkins can download the `.hpi` from your target mirror site.
+
+## Background
+
+It's might not be a good idea to change the `update-center.json` file directly. keeping sync all files
+should be simple without other logic.
+
+Second, you need to provide a certificate file if you changed the `update-center.json`. Because Jenkins
+will validate the file before parsing it. It's necessary due to the safety reason.
+
+## Design
+
+* Create an adapter to replace the base URL
+* Provide a certificate file
+
+## How to
+
+Here's a prototype implement which added into [localization-zh-cn-plugin](https://github.com/jenkinsci/localization-zh-cn-plugin/pull/115).
+You Just need to take three steps if you want to use a real mirror of update center:
+
+* install localization-zh-cn-plugin 1.0.10
+* use the new certificate file
+* change the update center URL
+
+## Feedback
+
+Please don't hesitate to tell us your thoughts.
