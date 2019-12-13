@@ -63,6 +63,12 @@ public class MirrorAdapter {
             jsonStr = jsonStr.substring(0, jsonStr.length() - jsonFooter.length());
             JSONObject json = JSONObject.fromObject(jsonStr);
 
+            // replace coreWarUrl
+            JSONObject core = json.getJSONObject("core");
+            String coreUrl = core.getString("url");
+            coreUrl = coreUrl.replaceAll("http://updates.jenkins-ci.org/download/", mirrorURL);
+            core.put("url", coreUrl);
+
             json.put("connectionCheckUrl", connectionCheckURL);
             JSONObject plugins = json.getJSONObject("plugins");
             json.remove("signature"); // to regenerate the new signature
