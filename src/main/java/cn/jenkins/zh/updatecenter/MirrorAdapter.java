@@ -8,6 +8,7 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
 import java.io.*;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Iterator;
@@ -21,6 +22,9 @@ public class MirrorAdapter {
 
     @Option(name = "-mirror-url", usage = "For example https://mirrors.tuna.tsinghua.edu.cn/jenkins/", required = true)
     public String mirrorURL;
+
+    @Option(name = "-mirror-provider", usage = "The provider of mirror service")
+    public String mirrorProvider;
 
     @Option(name = "-mirror-json", usage = "Official JSON file which comes from http://mirrors.jenkins.io/updates/update-center.json", required = true)
     public File mirrorJSON = null;
@@ -76,7 +80,8 @@ public class MirrorAdapter {
             while(it.hasNext()) {
                 JSONObject plugin = plugins.getJSONObject(it.next().toString());
                 String url = plugin.getString("url");
-                url = url.replaceAll("http://updates.jenkins-ci.org/download/", mirrorURL);
+                url = url.replaceAll("http://updates.jenkins-ci.org/download/", "https://updates.jenkins-zh.cn/jenkins/");
+                url = url + "?provider=" + mirrorProvider;
                 plugin.put("url", url);
             }
 
