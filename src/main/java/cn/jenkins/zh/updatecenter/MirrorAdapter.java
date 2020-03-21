@@ -70,7 +70,7 @@ public class MirrorAdapter {
             json.remove("signature"); // to regenerate the new signature
 
             JSONObject result = signer.sign(json);
-            out.write((toolJSONHeader + result.toString() + toolJSONFooter).getBytes());
+            out.write((toolJSONHeader + result.toString(2, 2) + toolJSONFooter).getBytes());
         }
         return 0;
     }

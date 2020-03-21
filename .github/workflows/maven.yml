@@ -20,5 +20,5 @@ jobs:
         DOCKER_TOKEN: ${{ secrets.DOCKER }}
       run: |
         docker login docker.pkg.github.com --username LinuxSuRen --password ${DOCKER_TOKEN}
-        docker build . -t docker.pkg.github.com/jenkins-zh/mirror-adapter/mirror-adapter:0.0.3
-        docker push docker.pkg.github.com/jenkins-zh/mirror-adapter/mirror-adapter:0.0.3
+        docker build . -t docker.pkg.github.com/jenkins-zh/mirror-adapter/mirror-adapter:0.0.4
+        docker push docker.pkg.github.com/jenkins-zh/mirror-adapter/mirror-adapter:0.0.4
