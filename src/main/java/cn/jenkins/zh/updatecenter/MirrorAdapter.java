@@ -8,8 +8,6 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
 import java.io.*;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Iterator;
 
@@ -29,6 +27,9 @@ public class MirrorAdapter {
     @Option(name = "-mirror-json", usage = "Official JSON file which comes from http://mirrors.jenkins.io/updates/update-center.json", required = true)
     public File mirrorJSON = null;
 
+    @Option(name = "-tools", usage = "If sign the tools metadata data")
+    public boolean signTools = false;
+
     private Signer signer = new Signer();
 
     private int run(String[] args) throws CmdLineException, IOException, GeneralSecurityException {
@@ -37,6 +38,10 @@ public class MirrorAdapter {
 
         p.parseArgument(args);
 
+        return signTools ? signTools() : signUpdateCenterJSON();
+    }
+
+    private int signTools() throws CmdLineException, GeneralSecurityException, IOException {
         // make sure the output directory exists
         File mirrorDir = mirrorJSON.getParentFile();
         if (!mirrorDir.isDirectory()) {
@@ -56,11 +61,43 @@ public class MirrorAdapter {
             FileOutputStream out = new FileOutputStream(mirrorJSON);) {
             ByteArrayOutputStream data = new ByteArrayOutputStream();
             IOUtils.copy(input, data);
-//            byte[] buf = new byte[1024];
-//            int len = -1;
-//            while((len = input.read(buf)) != -1) {
-//                data.write(buf, 0, len);
-//            }
+
+            String jsonStr = data.toString("UTF-8");
+            jsonStr = jsonStr.substring(toolJSONHeader.length());
+            jsonStr = jsonStr.substring(0, jsonStr.length() - toolJSONFooter.length());
+            JSONObject json = JSONObject.fromObject(jsonStr);
+
+            json.remove("signature"); // to regenerate the new signature
+
+            JSONObject result = signer.sign(json);
+            out.write((toolJSONHeader + result.toString() + toolJSONFooter).getBytes());
+        }
+        return 0;
+    }
+
+    private final String toolJSONHeader = "<!DOCTYPE html><html><head><meta http-equiv='Content-Type' content='text/html;charset=UTF-8' /></head><body><script>window.onload = function () { window.parent.postMessage(JSON.stringify(\n";
+    private final String toolJSONFooter = "\n),'*'); };</script></body></html>";
+
+    private int signUpdateCenterJSON() throws IOException, GeneralSecurityException, CmdLineException {
+        // make sure the output directory exists
+        File mirrorDir = mirrorJSON.getParentFile();
+        if (!mirrorDir.isDirectory()) {
+            boolean dirCreating = mirrorDir.mkdirs();
+            if (!dirCreating) {
+                System.err.println(String.format("cannot create directory: %s", mirrorDir.getAbsolutePath()));
+                return -1;
+            }
+        }
+        // check whether officialJSON is a regular file
+        if (!officialJSON.isFile()) {
+            System.err.println(String.format("official json file is not a regular file: %s", officialJSON.getAbsolutePath()));
+            return -2;
+        }
+
+        try(InputStream input = new FileInputStream(officialJSON);
+            FileOutputStream out = new FileOutputStream(mirrorJSON);) {
+            ByteArrayOutputStream data = new ByteArrayOutputStream();
+            IOUtils.copy(input, data);
 
             String jsonStr = data.toString("UTF-8");
             jsonStr = jsonStr.substring(jsonHeader.length());
@@ -88,7 +125,6 @@ public class MirrorAdapter {
             JSONObject result = signer.sign(json);
             out.write((jsonHeader + result.toString() + jsonFooter).getBytes());
         }
-
         return 0;
     }
 
