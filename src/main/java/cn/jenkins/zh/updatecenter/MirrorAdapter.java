@@ -107,7 +107,7 @@ public class MirrorAdapter {
             // replace coreWarUrl
             JSONObject core = json.getJSONObject("core");
             String coreUrl = core.getString("url");
-            coreUrl = coreUrl.replaceAll("http://updates.jenkins-ci.org/download/", mirrorURL);
+            coreUrl = coreUrl.replaceAll("https://updates.jenkins.io/download/", mirrorURL);
             core.put("url", coreUrl);
 
             json.put("connectionCheckUrl", connectionCheckURL);
@@ -117,7 +117,7 @@ public class MirrorAdapter {
             while(it.hasNext()) {
                 JSONObject plugin = plugins.getJSONObject(it.next().toString());
                 String url = plugin.getString("url");
-                url = url.replaceAll("http://updates.jenkins-ci.org/download/", "https://updates.jenkins-zh.cn/jenkins/");
+                url = url.replaceAll("https://updates.jenkins.io/download/", "https://updates.jenkins-zh.cn/jenkins/");
                 url = url + "?provider=" + mirrorProvider;
                 plugin.put("url", url);
             }
