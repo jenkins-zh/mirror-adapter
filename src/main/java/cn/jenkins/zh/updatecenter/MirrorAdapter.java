@@ -1,5 +1,6 @@
 package cn.jenkins.zh.updatecenter;
 
+import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.kohsuke.args4j.ClassParser;
@@ -94,9 +95,9 @@ public class MirrorAdapter {
             return -2;
         }
 
+        ByteArrayOutputStream data = new ByteArrayOutputStream();
         try(InputStream input = new FileInputStream(officialJSON);
             FileOutputStream out = new FileOutputStream(mirrorJSON);) {
-            ByteArrayOutputStream data = new ByteArrayOutputStream();
             IOUtils.copy(input, data);
 
             String jsonStr = data.toString("UTF-8");
@@ -124,6 +125,9 @@ public class MirrorAdapter {
 
             JSONObject result = signer.sign(json);
             out.write((jsonHeader + result.toString() + jsonFooter).getBytes());
+        } catch (JSONException e) {
+            e.printStackTrace();
+            System.err.println("Error happened when parse json file from '" + officialJSON + "', data is: " + data.toString());
         }
         return 0;
     }
