@@ -80,7 +80,7 @@
         <dependency>
             <groupId>jetty</groupId>
             <artifactId>jetty-util</artifactId>
-            <version>6.0.0rc1</version>
+            <version>6.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.jvnet.hudson</groupId>
