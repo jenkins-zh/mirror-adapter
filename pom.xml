@@ -15,7 +15,7 @@
     <version>0.0.1-SNAPSHOT</version>
 
     <properties>
-        <args4j.version>2.0.19</args4j.version>
+        <args4j.version>2.33</args4j.version>
         <main.class>cn.jenkins.zh.updatecenter.MirrorAdapter</main.class>
     </properties>
 
